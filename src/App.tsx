@@ -13,7 +13,7 @@ function App() {
   const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
-    fetch('/src/data/cleaned_file.csv')
+    fetch('/data/cleaned_file.csv')
       .then((response) => response.text())
       .then((csv) => {
         const results = Papa.parse(csv, { header: true });
