@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import type { College, Review } from './types';
 import { Navbar } from './components/Navbar';
@@ -8,7 +8,7 @@ import { HomePage } from './pages/HomePage';
 import { ComparePage } from './pages/ComparePage';
 import { ReviewPage } from './pages/ReviewPage';
 import { SignedIn, RedirectToSignIn, SignedOut } from '@clerk/clerk-react';
-
+import { CollegeDetailPage } from './pages/CollegeDetailsPage';
 function App() {
   const [colleges, setColleges] = useState<College[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -58,8 +58,27 @@ function App() {
 
   const handleVote = async (winner: College, loser: College, newRatings: [number, number]) => {
     try {
+      // Update ratings
+      const winnerRef = doc(db, 'colleges', winner.id);
+      const loserRef = doc(db, 'colleges', loser.id);
+
+      // Create match history
+      const matchRef = collection(db, 'matches');
+      
+      await Promise.all([
+        updateDoc(winnerRef, { eloRating: newRatings[0] }),
+        updateDoc(loserRef, { eloRating: newRatings[1] }),
+        addDoc(matchRef, {
+          winnerId: winner.id,
+          loserId: loser.id,
+          winnerName: winner.name,
+          loserName: loser.name,
+          date: new Date().toISOString()
+        })
+      ]);
+
       // Update local state
-      setColleges((prev) =>
+      setColleges(prev =>
         prev.map((college) => {
           if (college.id === winner.id) {
             return { ...college, eloRating: newRatings[0] };
@@ -70,38 +89,8 @@ function App() {
           return college;
         })
       );
-
-      // Update Firebase
-      const winnerRef = doc(db, 'colleges', winner.id);
-      const loserRef = doc(db, 'colleges', loser.id);
-
-      // Update both documents in parallel
-      await Promise.all([
-        updateDoc(winnerRef, {
-          eloRating: newRatings[0]
-        }),
-        updateDoc(loserRef, {
-          eloRating: newRatings[1]
-        })
-      ]);
-
-    } catch (err) {
-      console.error('Error updating ratings:', err);
-      // Optionally show an error message to the user
-      setError('Failed to update ratings. Please try again.');
-      
-      // Revert the local state if the Firebase update fails
-      setColleges((prev) =>
-        prev.map((college) => {
-          if (college.id === winner.id) {
-            return { ...college, eloRating: winner.eloRating };
-          }
-          if (college.id === loser.id) {
-            return { ...college, eloRating: loser.eloRating };
-          }
-          return college;
-        })
-      );
+    } catch (error) {
+      console.error('Error updating match data:', error);
     }
   };
 
@@ -187,6 +176,7 @@ function App() {
                 </>
               }
             />
+            <Route path="/college/:collegeId" element={<CollegeDetailPage />} />
           </Routes>
         </main>
       </div>

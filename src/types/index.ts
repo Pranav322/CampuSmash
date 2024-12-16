@@ -21,11 +21,29 @@ export interface College {
   details: CollegeDetails;
 }
 
+// src/types/index.ts
 export interface Review {
   id: string;
   collegeId: string;
-  author: string;
+  authorId: string;
+  authorName: string;
   rating: number;
   content: string;
   date: string;
+}
+
+export interface MatchHistory {
+  id: string;
+  winnerId: string;
+  loserId: string;
+  winnerName: string;
+  loserName: string;
+  date: string;
+}
+
+export interface CollegeStats {
+  totalMatches: number;
+  wins: number;
+  losses: number;
+  averageRating: number;
 }
