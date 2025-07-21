@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Review, MatchHistory, CollegeStats } from '../types';
-import { useUser } from '@clerk/clerk-react';
+import { Review, MatchHistory, CollegeStats, College } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 export const CollegeDetailPage: React.FC = () => {
   const { collegeId } = useParams();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [college, setCollege] = useState<College | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [matchHistory, setMatchHistory] = useState<MatchHistory[]>([]);

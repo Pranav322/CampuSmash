@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Swords, ChevronDown, Trophy } from 'lucide-react';
 import type { College } from '../types';
 import { calculateNewRatings } from '../utils/eloCalculator';
-import { CollegeCard } from '../components/CollegeCard';
+import { CompareCollegeCard } from '../components/CompareCollegeCard';
 
 interface ComparePageProps {
   colleges: College[];
@@ -71,7 +71,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ colleges, onVote }) =>
       <div className="flex flex-col md:flex-row justify-between items-center gap-8">
         {/* Left College */}
         <div className="w-full md:w-5/12 relative">
-          <div className="h-[450px] perspective-1000">
+          <div className="h-[550px] perspective-1000">
             <AnimatePresence>
               {isSpinning ? (
                 <div className="absolute w-full overflow-hidden rounded-xl shadow-2xl">
@@ -87,7 +87,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ colleges, onVote }) =>
                         ease: "easeInOut"
                       }}
                     >
-                      <CollegeCard college={college} />
+                      <CompareCollegeCard college={college} />
                     </motion.div>
                   ))}
                 </div>
@@ -99,7 +99,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ colleges, onVote }) =>
                   className="cursor-pointer transform transition-transform duration-200 hover:shadow-xl rounded-xl"
                   onClick={() => handleVote(pair[0])}
                 >
-                  <CollegeCard college={pair[0]} />
+                  <CompareCollegeCard college={pair[0]} />
                   {winner === pair[0] && (
                     <motion.div
                       initial={{ scale: 0 }}
@@ -135,7 +135,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ colleges, onVote }) =>
 
         {/* Right College */}
         <div className="w-full md:w-5/12 relative">
-          <div className="h-[450px] perspective-1000">
+          <div className="h-[550px] perspective-1000">
             <AnimatePresence>
               {isSpinning ? (
                 <div className="absolute w-full overflow-hidden rounded-xl shadow-2xl">
@@ -151,7 +151,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ colleges, onVote }) =>
                         ease: "easeInOut"
                       }}
                     >
-                      <CollegeCard college={college} />
+                      <CompareCollegeCard college={college} />
                     </motion.div>
                   ))}
                 </div>
@@ -163,7 +163,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ colleges, onVote }) =>
                   className="cursor-pointer transform transition-transform duration-200 hover:shadow-xl rounded-xl"
                   onClick={() => handleVote(pair[1])}
                 >
-                  <CollegeCard college={pair[1]} />
+                  <CompareCollegeCard college={pair[1]} />
                   {winner === pair[1] && (
                     <motion.div
                       initial={{ scale: 0 }}
@@ -187,7 +187,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ colleges, onVote }) =>
         transition={{ delay: 0.5 }}
       >
         <p className="text-lg text-blue-700 font-medium">
-          Click on a college card to cast your vote!
+          Compare the details and click on your preferred college to vote!
         </p>
       </motion.div>
     </div>

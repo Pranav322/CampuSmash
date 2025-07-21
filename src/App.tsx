@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from './firebase';
@@ -7,8 +7,9 @@ import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/HomePage';
 import { ComparePage } from './pages/ComparePage';
 import { ReviewPage } from './pages/ReviewPage';
-import { SignedIn, RedirectToSignIn, SignedOut } from '@clerk/clerk-react';
 import { CollegeDetailPage } from './pages/CollegeDetailsPage';
+import { useAuth } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 function App() {
   const [colleges, setColleges] = useState<College[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -95,10 +96,12 @@ function App() {
   };
 
   const handleReview = async (collegeId: string, review: { rating: number; content: string }) => {
+    const { user } = useAuth();
     const newReview: Review = {
       id: Date.now().toString(),
       collegeId,
-      author: 'Anonymous', // You might want to get this from Clerk user
+      authorId: user?.uid || 'anonymous',
+      authorName: 'Anonymous User',
       rating: review.rating,
       content: review.content,
       date: new Date().toISOString(),
@@ -106,10 +109,8 @@ function App() {
 
     try {
       // Add review to Firebase
-      // You might want to create a separate collection for reviews
-      const reviewsCollection = collection(db, 'reviews');
-      // Add code here to save review to Firebase
-      
+      await addDoc(collection(db, 'reviews'), newReview);
+
       // Update local state only after successful Firebase update
       setReviews((prev) => [...prev, newReview]);
     } catch (err) {
@@ -153,27 +154,17 @@ function App() {
             <Route
               path="/compare"
               element={
-                <>
-                  <SignedIn>
-                    <ComparePage colleges={colleges} onVote={handleVote} />
-                  </SignedIn>
-                  <SignedOut>
-                    <RedirectToSignIn />
-                  </SignedOut>
-                </>
+                <ProtectedRoute>
+                  <ComparePage colleges={colleges} onVote={handleVote} />
+                </ProtectedRoute>
               }
             />
             <Route
               path="/reviews"
               element={
-                <>
-                  <SignedIn>
-                    <ReviewPage colleges={colleges} onSubmitReview={handleReview} />
-                  </SignedIn>
-                  <SignedOut>
-                    <RedirectToSignIn />
-                  </SignedOut>
-                </>
+                <ProtectedRoute>
+                  <ReviewPage colleges={colleges} onSubmitReview={handleReview} />
+                </ProtectedRoute>
               }
             />
             <Route path="/college/:collegeId" element={<CollegeDetailPage />} />
